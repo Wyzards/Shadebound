@@ -1,5 +1,6 @@
 package com.Theeef.me;
 
+import com.Theeef.me.mobs.Spawning;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
@@ -9,14 +10,20 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class Shadebound extends JavaPlugin implements Listener {
+public class Shadebound extends JavaPlugin {
+
+    public static ConfigManager cfm;
 
     @Override
     public void onEnable() {
+        loadConfig();
+
         getServer().getConsoleSender().sendMessage(ChatColor.GREEN + "Shadebound Enabled");
-        getServer().getPluginManager().registerEvents(this, this);
+        getServer().getPluginManager().registerEvents(new Spawning(), this);
+        getServer().getPluginManager().registerEvents(new LightDecay(), this);
 
         VoidDamage.voidDamageLoop();
+        LightDecay.lightLoop();
     }
 
     @Override
@@ -24,8 +31,17 @@ public class Shadebound extends JavaPlugin implements Listener {
 
     }
 
-    @EventHandler
-    public void dropItem(PlayerDropItemEvent event) {
-        event.getPlayer().sendMessage("Damage: " + (event.getItemDrop().getItemStack().getType().getMaxDurability() - ((Damageable) event.getItemDrop().getItemStack().getItemMeta()).getDamage()));
+    public void loadConfig() {
+        getConfig().options().copyDefaults(true);
+        saveConfig();
+
+        Shadebound.cfm = new ConfigManager();
+        Shadebound.cfm.setup();
+        Shadebound.cfm.getLights().options().copyDefaults(true);
+        Shadebound.cfm.saveLights();
+    }
+
+    public static ConfigManager getCfm() {
+        return Shadebound.cfm;
     }
 }

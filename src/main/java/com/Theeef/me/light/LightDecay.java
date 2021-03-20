@@ -59,8 +59,12 @@ public class LightDecay implements Listener {
         return Shadebound.getCfm().getLights().getDouble(type.getName() + "." + block.getWorld().getName() + "." + block.getX() + "," + block.getY() + "," + block.getZ());
     }
 
+    public static void trackLight(Block block, double startingFuel) {
+        LightDecay.setLight(LightType.getByMaterial(block.getType()), block, startingFuel);
+    }
+
     public static void trackLight(Block block) {
-        setLight(LightType.getByMaterial(block.getType()), block, LightType.getByMaterial(block.getType()).getMaxFuel());
+        LightDecay.trackLight(block, LightType.getByMaterial(block.getType()).getMaxFuel());
     }
 
     public static void untrackLight(LightType type, Block block) {
@@ -118,8 +122,12 @@ public class LightDecay implements Listener {
     public void torchPlace(BlockPlaceEvent event) {
         Material type = event.getBlock().getType();
 
-        if (type == Material.TORCH || type == Material.WALL_TORCH || type == Material.JACK_O_LANTERN || type == Material.CAMPFIRE)
-            trackLight(event.getBlock());
+        if (LightType.isLightMaterial(event.getBlock().getType())) {
+            if (NBTHandler.hasString(event.getItemInHand(), "lightFuel"))
+                trackLight(event.getBlock(), Integer.parseInt(NBTHandler.getString(event.getItemInHand(), "lightFuel")));
+            else
+                trackLight(event.getBlock());
+        }
     }
 
     @EventHandler
@@ -165,8 +173,9 @@ public class LightDecay implements Listener {
 
     @EventHandler
     public void fireSpawn(BlockPhysicsEvent event) {
-        if (event.getChangedType() == Material.FIRE)
+        if (event.getChangedType() == Material.FIRE && !LightType.FIRE.isLight(event.getBlock())) {
             trackLight(event.getBlock());
+        }
     }
 
     @EventHandler

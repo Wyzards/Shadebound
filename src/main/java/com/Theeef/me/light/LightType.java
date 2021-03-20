@@ -98,6 +98,17 @@ public class LightType {
         throw new NullPointerException("LightType " + this.name + " cannot be moved");
     }
 
+    public ItemStack getFueledItem(double fuel) {
+        if (this.name.equals("TORCH")) {
+            return fueledTorch(fuel);
+        }
+
+        if (this.name.equals("JACK_O_LANTERN"))
+            return fueledJackOLantern(fuel);
+
+        throw new NullPointerException("LightType " + this.name + " cannot be moved");
+    }
+
     public static ItemStack fueledJackOLantern(double fuel) {
         ItemStack item = new ItemStack(Material.JACK_O_LANTERN, 1);
         ItemMeta meta = item.getItemMeta();

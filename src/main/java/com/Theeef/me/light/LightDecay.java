@@ -3,14 +3,13 @@ package com.Theeef.me.light;
 import com.Theeef.me.Shadebound;
 import com.Theeef.me.util.NBTHandler;
 import com.google.common.collect.Lists;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.Lightable;
 import org.bukkit.block.data.type.Campfire;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -41,8 +40,38 @@ public class LightDecay implements Listener {
                                 untrackLight(type, block);
                             }
                         }
+
+                for (Player player : Bukkit.getOnlinePlayers())
+                    for (ItemStack item : player.getInventory().getContents())
+                        if (item != null && LightType.isLightMaterial(item.getType()) && NBTHandler.hasString(item, "lightFuel")) {
+
+                        }
             }
         }.runTaskTimer(Shadebound.getPlugin(Shadebound.class), 0, 20);
+    }
+
+    public static void decreaseItemLight(ItemStack item, Location location) {
+        LightType type = LightType.getByMaterial(item.getType());
+        double fuel = Double.parseDouble(NBTHandler.getString(item, "lightFuel"));
+        double temp = location.getBlock().getTemperature();
+
+        fuel -= (1.989652 - 1.495125 * temp + 0.3803238 * Math.pow(temp, 2)) * (location.getWorld().isClearWeather() ? 1 : (type.ignoresWeather() ? 1 : (temp >= .95 ? 1 : (location.getBlock().getLightFromSky() > 12 ? 10 * (location.getBlock().getLightFromSky() - 12) : 1))));
+
+        if (fuel <= 0)
+            extinguishItem(item);
+        else {
+            item.setItemMeta(type.getFueledItem(fuel).getItemMeta());
+        }
+    }
+
+    public static void extinguishItem(ItemStack item) {
+        if (item.getType() == Material.TORCH) {
+            item.setItemMeta(burntTorch(1).getItemMeta());
+        } else if (item.getType() == Material.JACK_O_LANTERN) {
+            ItemStack pumpkin = new ItemStack(Material.CARVED_PUMPKIN, 1);
+            item.setType(Material.CARVED_PUMPKIN);
+            item.setItemMeta(pumpkin.getItemMeta());
+        }
     }
 
     public static void setLight(LightType type, Block block, double fuel) {
@@ -105,6 +134,7 @@ public class LightDecay implements Listener {
         }
 
         untrackLight(lightType, block);
+        block.getWorld().playSound(block.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 1.0f, 1.0f);
     }
 
     public static ItemStack burntTorch(int amount) {
@@ -124,7 +154,7 @@ public class LightDecay implements Listener {
 
         if (LightType.isLightMaterial(event.getBlock().getType())) {
             if (NBTHandler.hasString(event.getItemInHand(), "lightFuel"))
-                trackLight(event.getBlock(), Integer.parseInt(NBTHandler.getString(event.getItemInHand(), "lightFuel")));
+                trackLight(event.getBlock(), Double.parseDouble(NBTHandler.getString(event.getItemInHand(), "lightFuel")));
             else
                 trackLight(event.getBlock());
         }

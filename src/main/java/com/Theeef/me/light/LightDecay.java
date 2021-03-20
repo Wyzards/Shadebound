@@ -81,6 +81,7 @@ public class LightDecay implements Listener {
 
     public static void extinguish(Block block) {
         BlockFace face = null;
+        LightType lightType = LightType.getByMaterial(block.getType());
 
         if (block.getBlockData() instanceof Directional)
             face = ((Directional) block.getBlockData()).getFacing();
@@ -93,19 +94,13 @@ public class LightDecay implements Listener {
             block.setBlockData(directional);
         }
 
-        if (block.getType() == Material.CAMPFIRE) {
-            Campfire campfire = (Campfire) block.getBlockData();
-            campfire.setLit(false);
-            block.setBlockData(campfire);
-        } else if (block.getType() == Material.REDSTONE_TORCH) {
-            Lightable light = (Lightable) block.getBlockData();
-            light.setLit(false);
-            block.setBlockData(light);
-        } else if (block.getType() == Material.REDSTONE_WALL_TORCH) {
-            Lightable light = (Lightable) block.getBlockData();
-            light.setLit(false);
-            block.setBlockData(light);
+        if (block.getBlockData() instanceof Lightable) {
+            Lightable lightable = (Lightable) block.getBlockData();
+            lightable.setLit(false);
+            block.setBlockData(lightable);
         }
+
+        untrackLight(lightType, block);
     }
 
     public static ItemStack burntTorch(int amount) {
@@ -162,9 +157,9 @@ public class LightDecay implements Listener {
             }
     }
 
-    //@EventHandler
-    public void torchDrop(ItemSpawnEvent event) {
-        if (event.getEntity().getItemStack().getType() == Material.TORCH && !NBTHandler.hasString(event.getEntity().getItemStack(), "lightFuel"))
+    @EventHandler
+    public void lightDropNaturally(ItemSpawnEvent event) {
+        if (LightType.isLightMaterial(event.getEntity().getItemStack().getType()) && LightType.getByMaterial(event.getEntity().getItemStack().getType()).canBeMoved() && !NBTHandler.hasString(event.getEntity().getItemStack(), "lightFuel"))
             event.setCancelled(true);
     }
 

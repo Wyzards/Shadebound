@@ -1,11 +1,11 @@
 com\Theeef\me\ConfigManager.class
-com\Theeef\me\LightDecay.class
 com\Theeef\me\VoidDamage$4.class
-com\Theeef\me\LightDecay$LightType.class
-com\Theeef\me\LightDecay$2.class
+com\Theeef\me\light\LightDecay$1.class
+com\Theeef\me\light\LightType$1.class
+com\Theeef\me\light\LightDecay.class
 com\Theeef\me\mobs\Spawning.class
-com\Theeef\me\LightDecay$1.class
 com\Theeef\me\VoidDamage$5.class
+com\Theeef\me\light\LightType.class
 com\Theeef\me\util\NBTHandler.class
 com\Theeef\me\VoidDamage$1.class
 com\Theeef\me\VoidDamage.class

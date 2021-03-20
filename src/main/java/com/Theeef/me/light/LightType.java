@@ -16,7 +16,7 @@ public class LightType {
 
     public static LightType TORCH = new LightType("TORCH", 1000, Sets.newHashSet(Material.TORCH, Material.WALL_TORCH), false, true);
     public static LightType CAMPFIRE = new LightType("CAMPFIRE", 2500, Material.CAMPFIRE, false, false);
-    public static LightType JACK_O_LANTERN = new LightType("JACK_O_LANTERN", 1000, Material.CAMPFIRE, true, true);
+    public static LightType JACK_O_LANTERN = new LightType("JACK_O_LANTERN", 1000, Material.JACK_O_LANTERN, true, true);
     public static LightType FIRE = new LightType("FIRE", 100, Material.FIRE, false, false);
 
     private final String name;

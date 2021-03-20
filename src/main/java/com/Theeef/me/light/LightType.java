@@ -94,6 +94,8 @@ public class LightType {
 
         if (this.name.equals("JACK_O_LANTERN"))
             return fueledJackOLantern(LightDecay.getLight(this, block));
+
+        throw new NullPointerException("LightType " + this.name + " cannot be moved");
     }
 
     public static ItemStack fueledJackOLantern(double fuel) {

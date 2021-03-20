@@ -1,13 +1,8 @@
 package com.Theeef.me;
 
+import com.Theeef.me.light.LightDecay;
 import com.Theeef.me.mobs.Spawning;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Item;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Shadebound extends JavaPlugin {

@@ -1,13 +1,8 @@
 package com.Theeef.me;
 
 import org.bukkit.*;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.*;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
@@ -29,30 +24,55 @@ public class VoidDamage {
                     }
                 }
             }
-        }.runTaskTimer(plugin, 0, 10);
+        }.runTaskTimerAsynchronously(plugin, 0, 10);
     }
 
     public static void blindnessAtNight(Entity entity) {
-        if (entity instanceof LivingEntity && entity.getLocation().getBlock().getLightFromBlocks() == 0 && entity.getLocation().getBlock().getLightLevel() <= 4 && (!(entity instanceof Player) || ((Player) entity).getGameMode() == GameMode.SURVIVAL))
-            ((LivingEntity) entity).addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 30, 255, false, false, false));
+        if (entity instanceof LivingEntity && entity.getLocation().getBlock().getLightFromBlocks() == 0 && entity.getLocation().getBlock().getLightLevel() <= 4 && (!(entity instanceof Player) || ((Player) entity).getGameMode() == GameMode.SURVIVAL)) {
+            Bukkit.getScheduler().runTask(plugin, new Runnable() {
+                @Override
+                public void run() {
+                    ((LivingEntity) entity).addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 30, 255, false, false, false));
+                }
+            });
+        }
     }
 
     public static void voidDamage(Entity entity) {
         int light = entity.getLocation().getBlock().getLightLevel();
 
-        if (light > 7 || entity.isInvulnerable() || (entity instanceof Player && ((Player) entity).getGameMode() != GameMode.SURVIVAL))
+        if (light > 7 || entity.isInvulnerable() || (entity instanceof Player && (((Player) entity).getGameMode() != GameMode.SURVIVAL)))
             return;
+
+        if (entity instanceof LivingEntity) {
+            LivingEntity living = (LivingEntity) entity;
+
+            if (living.getEquipment().getItemInMainHand().getType() == Material.TORCH || living.getEquipment().getItemInOffHand().getType() == Material.TORCH)
+                return;
+        }
 
         double damage = (8 - light) / 8.0 * 4;
 
         if (damage > 0) {
             if (entity instanceof Damageable) {
-                ((Damageable) entity).damage(damage);
-                entity.setLastDamageCause(new EntityDamageEvent(entity, EntityDamageEvent.DamageCause.VOID, damage));
+
+                Bukkit.getScheduler().runTask(plugin, new Runnable() {
+                    @Override
+                    public void run() {
+                        ((Damageable) entity).damage(damage);
+                        entity.setLastDamageCause(new EntityDamageEvent(entity, EntityDamageEvent.DamageCause.VOID, damage));
+                    }
+                });
 
                 if (entity instanceof Player) {
                     VoidDamage.voidDamageSound(entity.getLocation());
-                    ((Player) entity).addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 40, 255, false, false, false));
+
+                    Bukkit.getScheduler().runTask(plugin, new Runnable() {
+                        @Override
+                        public void run() {
+                            ((Player) entity).addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 40, 255, false, false, false));
+                        }
+                    });
                 }
 
             } else if (entity instanceof Item) {

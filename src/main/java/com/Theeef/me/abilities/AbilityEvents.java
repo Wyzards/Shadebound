@@ -14,7 +14,9 @@ import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class AbilityEvents implements Listener {
@@ -30,12 +32,16 @@ public class AbilityEvents implements Listener {
         }
     }
 
-    public static void selectAbilityGUI(Player player, ItemStack item) {
-        Set<Ability> activeAbilities = Abilities.getAvailableActiveAbilities(item);
+    public static void selectAbilityGUI(Player player, ItemStack item, int page) {
+        List<Ability> activeAbilities = new ArrayList<Ability>(Abilities.getAvailableActiveAbilities(item));
         Inventory inventory = Bukkit.getServer().createInventory(null, activeAbilities.size() / 9 + 1, "Bind Ability");
 
-        for (Ability ability : activeAbilities)
-            inventory.addItem(abilityItem(ability));
+        for (int i = 5 * 9 * (page - 1); i < activeAbilities.size(); i++)
+            inventory.addItem(abilityItem(activeAbilities.get(i)));
+
+        ADD PAGETURNING
+
+        player.openInventory(inventory);
     }
 
     public static ItemStack abilityItem(Ability ability) {

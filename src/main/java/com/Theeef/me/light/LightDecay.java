@@ -18,6 +18,9 @@ import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -44,14 +47,15 @@ public class LightDecay implements Listener {
                 for (Player player : Bukkit.getOnlinePlayers())
                     for (ItemStack item : player.getInventory().getContents())
                         if (item != null && LightType.isLightMaterial(item.getType()) && NBTHandler.hasString(item, "lightFuel")) {
-
+                            decreaseItemLight(item, player);
                         }
             }
         }.runTaskTimer(Shadebound.getPlugin(Shadebound.class), 0, 20);
     }
 
-    public static void decreaseItemLight(ItemStack item, Location location) {
+    public static void decreaseItemLight(ItemStack item, Player player) {
         LightType type = LightType.getByMaterial(item.getType());
+        Location location = player.getLocation();
         double fuel = Double.parseDouble(NBTHandler.getString(item, "lightFuel"));
         double temp = location.getBlock().getTemperature();
 
@@ -60,12 +64,13 @@ public class LightDecay implements Listener {
         if (fuel <= 0)
             extinguishItem(item);
         else {
-            item.setItemMeta(type.getFueledItem(fuel).getItemMeta());
+            item.setItemMeta(type.getFueledItem(fuel, 1).getItemMeta());
         }
     }
 
     public static void extinguishItem(ItemStack item) {
         if (item.getType() == Material.TORCH) {
+            item.setType(Material.LEVER);
             item.setItemMeta(burntTorch(1).getItemMeta());
         } else if (item.getType() == Material.JACK_O_LANTERN) {
             ItemStack pumpkin = new ItemStack(Material.CARVED_PUMPKIN, 1);
@@ -134,7 +139,7 @@ public class LightDecay implements Listener {
         }
 
         untrackLight(lightType, block);
-        block.getWorld().playSound(block.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 1.0f, 1.0f);
+        block.getWorld().playSound(block.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, SoundCategory.BLOCKS, 0.3f, 1.0f);
     }
 
     public static ItemStack burntTorch(int amount) {
@@ -165,37 +170,43 @@ public class LightDecay implements Listener {
         if (LightType.isLightMaterial(event.getBlock().getType())) {
             LightType light = LightType.getByMaterial(event.getBlock().getType());
 
-            if (light.canBeMoved() && light.isLight(event.getBlock())) {
+            /*if (light.canBeMoved() && light.isLight(event.getBlock())) {
                 event.getBlock().getWorld().dropItem(event.getBlock().getLocation().add(0.5, 0.5, 0.5), light.getFueledItem(event.getBlock()));
-            }
+            }*/
+
+            untrackLight(light, event.getBlock());
         }
     }
 
     @EventHandler
-    public void torchExplode(BlockExplodeEvent event) {
+    public void lightExplode(BlockExplodeEvent event) {
         for (Block block : event.blockList())
             if (LightType.isLightMaterial(block.getType())) {
                 LightType light = LightType.getByMaterial(block.getType());
 
-                if (light.canBeMoved() && light.isLight(block)) {
+                /*if (light.canBeMoved() && light.isLight(block)) {
                     block.getWorld().dropItem(block.getLocation().add(0.5, 0.5, 0.5), light.getFueledItem(block));
-                }
+                }*/
+
+                untrackLight(light, block);
             }
     }
 
     @EventHandler
-    public void torchExplode(EntityExplodeEvent event) {
+    public void lightExplodeByEntity(EntityExplodeEvent event) {
         for (Block block : event.blockList())
             if (LightType.isLightMaterial(block.getType())) {
                 LightType light = LightType.getByMaterial(block.getType());
 
-                if (light.canBeMoved() && light.isLight(block)) {
+                /*if (light.canBeMoved() && light.isLight(block)) {
                     block.getWorld().dropItem(block.getLocation().add(0.5, 0.5, 0.5), light.getFueledItem(block));
-                }
+                }*/
+
+                untrackLight(light, block);
             }
     }
 
-    @EventHandler
+    // @EventHandler
     public void lightDropNaturally(ItemSpawnEvent event) {
         if (LightType.isLightMaterial(event.getEntity().getItemStack().getType()) && LightType.getByMaterial(event.getEntity().getItemStack().getType()).canBeMoved() && !NBTHandler.hasString(event.getEntity().getItemStack(), "lightFuel"))
             event.setCancelled(true);

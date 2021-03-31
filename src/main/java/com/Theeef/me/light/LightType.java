@@ -98,7 +98,7 @@ public class LightType {
         throw new NullPointerException("LightType " + this.name + " cannot be moved");
     }
 
-    public ItemStack getFueledItem(double fuel) {
+    public ItemStack getFueledItem(double fuel, int amount) {
         if (this.name.equals("TORCH")) {
             return fueledTorch(fuel);
         }

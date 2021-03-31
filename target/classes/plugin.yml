@@ -3,3 +3,4 @@ author: Theeef
 version: 1.0
 main: com.Theeef.me.Shadebound
 api-version: 1.13
+depend: [ ProtocolLib ]

@@ -1,5 +1,6 @@
 package com.Theeef.me;
 
+import com.Theeef.me.light.LightType;
 import org.bukkit.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -80,9 +81,10 @@ public class VoidDamage {
                 ItemMeta meta = itemstack.getItemMeta();
                 org.bukkit.inventory.meta.Damageable damageable = (org.bukkit.inventory.meta.Damageable) meta;
 
-                if (damageable.getDamage() + ((int) (damage * 5)) > itemstack.getType().getMaxDurability())
-                    entity.remove();
-                else {
+                if (damageable.getDamage() + ((int) (damage * 5)) > itemstack.getType().getMaxDurability()) {
+                    if (!LightType.isLightMaterial(itemstack.getType()))
+                        entity.remove();
+                } else {
                     damageable.setDamage(damageable.getDamage() + ((int) (damage * 5)));
                     itemstack.setItemMeta(meta);
                 }
